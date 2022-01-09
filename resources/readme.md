@@ -1,3 +1,5 @@
+=> csv_matter.csv contains 8000 samples of data. In the given csv file you will have the data for three different axes i.e. x, y and z but you only need to use the first 1000 samples of data to complete the task (more than 1000 samples may lead to plot unjustified graphs) (sampling time of the data is 0.01 second). The file contains raw output data received from MPU 6050. You need to refer to the datasheet for MPU6050 to know how the data is oriented in MPU6050.
+
 csv_matter.csv file contains column-wise data for different registers as described below:
 Colum no. in CSV file | Register name of mpu 6050 | Decimal address of the register
 -- | -- | --
