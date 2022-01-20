@@ -30,13 +30,13 @@ RES = [ res1 res2 ];
 #disp(t)
 
 
-subplot(1,1,1);
+subplot(3,1,1);
 ylabel('A_XOUT');
 xlabel('time');
 plot(t,res1);
 title('A_XOUT vs time');
 
-#{
+
 subplot(3,1,2);
 xlabel('A_YOUT');
 ylabel('G_YOUT');
@@ -48,4 +48,3 @@ xlabel('A_ZOUT');
 ylabel('G_ZOUT');
 plot(res3,res6);
 title('A_ZOUT vs G_ZOUT');
-#}
