@@ -25,26 +25,40 @@ res6 = double(typecast([uint8(G_ZOUT_L), uint8(G_ZOUT_H)], 'int16'))
 
 t=0.01:0.01:10;
 
-RES = [ res1 res2 ]; 
+RES = [ res1 res2 res3 res4 res5 res6 ]; 
 
-#disp(t)
-
-
-subplot(3,1,1);
+subplot(6,1,1);
 ylabel('A_XOUT');
 xlabel('time');
 plot(t,res1);
 title('A_XOUT vs time');
 
+subplot(6,1,2);
+ylabel('A_YOUT');
+xlabel('time');
+plot(t,res2);
+title('A_YOUT vs time');
 
-subplot(3,1,2);
-xlabel('A_YOUT');
+subplot(6,1,3);
+ylabel('A_ZOUT');
+xlabel('time');
+plot(t,res3);
+title('A_ZOUT vs time');
+
+subplot(6,1,4);
+ylabel('G_XOUT');
+xlabel('time');
+plot(t,res4);
+title('G_XOUT vs time');
+
+subplot(6,1,5);
 ylabel('G_YOUT');
-plot(res2,res5);
-title('A_YOUT vs G_YOUT');
+xlabel('time');
+plot(t,res5);
+title('G_YOUT vs time');
 
-subplot(3,1,3);
-xlabel('A_ZOUT');
+subplot(6,1,6);
 ylabel('G_ZOUT');
-plot(res3,res6);
-title('A_ZOUT vs G_ZOUT');
+xlabel('time');
+plot(t,res6);
+title('G_ZOUT vs time');
