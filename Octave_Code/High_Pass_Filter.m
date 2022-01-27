@@ -1,5 +1,7 @@
 clc
 clear all;
+
+#Reading Exceldata of Gyroscope
 ReadXcel = xlsread('csv_matter.xlsx', 'Sheet1','A2:L1001');
 G_XOUT_H = ReadXcel(:,7);
 G_XOUT_L = ReadXcel(:,8);
@@ -8,14 +10,18 @@ G_YOUT_L = ReadXcel(:,10);
 G_ZOUT_H = ReadXcel(:,11);
 G_ZOUT_L = ReadXcel(:,12);
 
+#Convert 2 8bit of gyroscope mapped data into 16bit mapped number
 res4 = double(typecast([uint8(G_XOUT_L), uint8(G_XOUT_H)], 'int16'))
 res5 = double(typecast([uint8(G_YOUT_L), uint8(G_YOUT_H)], 'int16'))
 res6 = double(typecast([uint8(G_ZOUT_L), uint8(G_ZOUT_H)], 'int16'))
 
+#Set cutoff frequency and acontrolling factor alpha
 fc = 600;
 RC = 1/(2*pi*fc) ;
 alpha =  RC / (RC+0.01);
 pkg load signal
+
+#Part for unmapping data of gyroscope which is in scale range +/-250 
 Part = 500/65535;
 
 for i=1:((length(res4)))
@@ -31,6 +37,7 @@ t=0:0.01:9.99;
 subplot(2,1,1);
 plot(t,gyr1);
 
+#applying high pass filter on unmapped data of gyroscope and plotting graph 
 fil4(1)=gyr1(1)
 for i=1:((length(gyr1))-1)  
   fil4(i+1)=alpha*fil4(i) + (alpha*(gyr1(i+1)-gyr1(i))) 
