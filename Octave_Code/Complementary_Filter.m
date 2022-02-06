@@ -1,0 +1,113 @@
+clc
+clear all;
+
+#storing 1000 excel mapped data of gyroscope and accelerometer into ReadXcel using xlsread function 
+ReadXcel = xlsread('csv_matter.xlsx', 'Sheet1','A2:L1001');
+
+A_XOUT_H = ReadXcel(:,1);  } #Storing Accelerometer X axis data into A_XOUT 
+A_XOUT_L = ReadXcel(:,2);  }
+A_YOUT_H = ReadXcel(:,3);  } #Storing Accelerometer Y axis data into A_YOUT
+A_YOUT_L = ReadXcel(:,4);  } 
+A_ZOUT_H = ReadXcel(:,5);  } #Storing Accelerometer Z axis data into A_ZOUT
+A_ZOUT_L = ReadXcel(:,6);  }
+G_XOUT_H = ReadXcel(:,7);  } #Storing Gyroscope X axis data into G_XOUT
+G_XOUT_L = ReadXcel(:,8);  }
+G_YOUT_H = ReadXcel(:,9);  } #Storing Gyroscope Y axis data into G_YOUT
+G_YOUT_L = ReadXcel(:,10); }
+G_ZOUT_H = ReadXcel(:,11); } #Storing Gyroscope Z axis data into G_ZOUT
+G_ZOUT_L = ReadXcel(:,12); }
+
+# Combine two  8bit data and make one 16bit data and store into variable to unmapping
+res1 = double(typecast([uint8(A_XOUT_L), uint8(A_XOUT_H)], 'int16'));
+res2 = double(typecast([uint8(A_YOUT_L), uint8(A_YOUT_H)], 'int16'));
+res3 = double(typecast([uint8(A_ZOUT_L), uint8(A_ZOUT_H)], 'int16'));
+res4 = double(typecast([uint8(G_XOUT_L), uint8(G_XOUT_H)], 'int16'));
+res5 = double(typecast([uint8(G_YOUT_L), uint8(G_YOUT_H)], 'int16'));
+res6 = double(typecast([uint8(G_ZOUT_L), uint8(G_ZOUT_H)], 'int16'));
+
+ts = 0.01;          #Sampling Rate
+T = 0:0.01:9.99;    #take total 1000 sample 0.01sec gap each
+
+#unmaped accelerometer x-axis, y-axis, z-axis 1000x1 data from scale range +/-2g and get data into unit m/s2, store in accx variable column wise 
+for i=1:((length(res1)))
+  if res1(i)<0
+    acc1(i,:)=-19.8+(-res1(i,:)*0.0006);
+  endif
+  if res1(i)>0
+    acc1(i,:)=19.8-(res1(i,:)*0.0006);
+  endif
+  if res2(i)<0
+    acc2(i,:)=-19.8+(-res2(i,:)*0.0006);
+  endif
+  if res2(i)>0
+    acc2(i,:)=19.8-(res2(i,:)*0.0006);
+  endif
+  if res3(i)<0
+    acc3(i,:)=-19.8+(-res3(i,:)*0.0006);
+  endif
+  if res3(i)>0
+    acc3(i,:)=19.8-(res3(i,:)*0.0006);
+  endif
+endfor
+
+gyr2=zeros(1000,1);  }   Initialize gyroscope y-z axis 1000x1 matrix with zeros
+gyr3=zeros(1000,1);  } 
+
+#unmaped gyroscope x-axis, y-axis, z-axis 1000x1 data from scale range +/-250 and get data into unit deg/sec, store in gyrx variable column wise 
+for i=1:((length(res4)))
+  if res4(i,:)<0
+    gyr1(i,:)=-250+(-res4(i,:)*0.0076);
+  endif
+  if res4(i,:)>0
+    gyr1(i,:)=250-(res4(i,:)*0.0076);
+  endif  
+  if res5(i,:)<0
+    gyr2(i,:)=-250+(-res5(i,:)*0.0076);
+  endif
+  if res5(i,:)>0
+    gyr2(i,:)=250-(res5(i,:)*0.0076);
+  endif
+  if res6(i,:)<0
+    gyr3(i,:)=-250+(-res6(i,:)*0.0076);
+  endif
+  if res6(i,:)>0
+    gyr3(i,:)=250-(res6(i,:)*0.0076);
+  endif
+endfor
+
+#calculate mean bias value 
+#mean_gyrx = sum(gyr1(1:100))/100;
+#mean_gyry = sum(gyr2(1:100))/100;
+#mean_gyrz = sum(gyr3(1:100))/100;
+
+#gyr3=gyr3-mean_gyry;
+
+angacc(1,:)=atan2(acc1(1,:),sqrt((acc2(1,:)*acc2(1,:)) + (acc3(1,:)*acc3(1,:))))*(180/pi); #calc and initialize first angle of accelerometer and store in 1x1 matrix
+anggyr(1,:)=angacc(1,:);  #intialize anggyr variable with storing accelerometer value 
+angcffilt(1,:)=angacc(1,:); #intialize angcffilt variable with storing accelerometer value  
+hp(1,:) = angacc(1,:);  #intialize hp(angle of high pass filter) variable with storing accelerometer value
+lp(1,:)=angacc(1,:);    #intialize lp(angle of low pass filter) variable with storing accelerometer value
+
+#for loop to calculate angle of accelerometer(angacc), gyroscope(anggyr) using this we also calculate angle of high pass filter(hp), angle of low pass filter(lp), angle of complemetary filter(angcffilt)
+#also initialize alpha as tunning factor of complementary filter
+#all calculated angle store into 1000x1 matrix
+
+for i=2:length(acc1)
+angacc(i,:) = (atan2(acc1(i,:),sqrt((acc2(i,:)*acc2(i,:)) + (acc3(i,:)*acc3(i,:)))))*(180/pi); 
+anggyr(i,:)= ((angcffilt(i-1,:)+(gyr2(i,:)*ts)));
+
+alpha=0.7;    
+beta = 1-alpha;
+
+lp(i,:) = ((1-alpha) * lp(i-1,:)) + (alpha * (angacc(i,:)));
+hp(i,:) = ((1-alpha)* hp(i-1,:)) + ((1-alpha)*(anggyr(i,:) - anggyr(i-1,:)));
+
+angcffilt(i,:) = (lp(i,:) + hp(i,:)) ; 
+endfor
+
+plot(T,angacc);   #plot graph of accelerometer versus time 
+hold on;
+plot(T,anggyr,'r'); #plot graph of gyroscope versus time 
+hold on;
+plot(T,angcffilt,'k') #plot graph of angle of complementary filter versus time
+
