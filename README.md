@@ -1,4 +1,4 @@
-# Tr1-Datafiltratio-with-matlab
+# Datafiltratio-with-GNU-Octave
 The repository includes Data fusion with complementary filter in GNU Octave
 
 * Owner: Abhiyanta Community
